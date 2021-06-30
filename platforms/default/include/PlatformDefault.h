@@ -60,16 +60,6 @@ public:
     //  Return an invalid or an empty string.
     //
     QString caBundlePath() const override;
-
-    //
-    //  Return false.
-    //
-    bool isPushAvailable() const override;
-
-    //
-    //  Return an invalid or an empty string.
-    //
-    QString pushToken() const override;
 };
 
 } // namespace platform

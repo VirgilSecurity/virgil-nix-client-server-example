@@ -41,6 +41,7 @@
 #include "OutgoingMessage.h"
 #include "UserImpl.h"
 #include "Platform.h"
+#include "PlatformNotifications.h"
 
 #include "NetworkAnalyzer.h"
 #include "XmppDiscoveryManager.h"
@@ -400,7 +401,8 @@ Self::CoreMessenger(Settings *settings, QObject *parent) : QObject(parent), m_im
     //
     //  Configure Push Notifications
     //
-    connect(&Platform::instance(), &Platform::pushTokenUpdated, this, &Self::onRegisterPushNotifications);
+    connect(&PlatformNotifications::instance(), &PlatformNotifications::pushTokenUpdated, this,
+            &Self::onRegisterPushNotifications);
 }
 
 Self::~CoreMessenger() noexcept = default;
@@ -963,7 +965,7 @@ UserId Self::groupUserIdFromJid(const QString &jid)
 
 void Self::onRegisterPushNotifications()
 {
-    if (!Platform::instance().isPushAvailable()) {
+    if (!PlatformNotifications::instance().isPushAvailable()) {
         return;
     }
 
@@ -987,7 +989,7 @@ void Self::onRegisterPushNotifications()
 
 void Self::onDeregisterPushNotifications()
 {
-    if (!Platform::instance().isPushAvailable()) {
+    if (!PlatformNotifications::instance().isPushAvailable()) {
         return;
     }
 
@@ -2433,7 +2435,7 @@ void Self::xmppOnMessageReceived(const QXmppMessage &xmppMessage)
     //  Got non archived message so send 'received' mark.
     //  TODO: Decide if need to filter group chat messages.
     //
-    const bool isIncomingValidMarkableMessage = (xmppMessage.type() != QXmppMessage::Error)
+    const bool isIncomingValidMarkableMessage = (xmppMessage.type() == QXmppMessage::Chat)
             && !xmppMessage.from().isEmpty() && !xmppMessage.id().isEmpty() && xmppMessage.isMarkable();
 
     if (isIncomingValidMarkableMessage) {
@@ -2998,12 +3000,10 @@ void Self::xmppOnCreateGroupChat(const GroupHandler &group, const GroupMembers &
                 //
                 //  Subscribe to Muc/Sub events.
                 //
+                m_impl->xmppMucSubManager->unsubscribe(room->jid());
                 m_impl->xmppMucSubManager->subscribe(
                         {
                                 XmppMucSubEvent::Messages,
-                                XmppMucSubEvent::Affiliations,
-                                XmppMucSubEvent::Subscribers,
-                                XmppMucSubEvent::Presence,
                         },
                         room->jid(), currentUser()->id());
 
@@ -3321,12 +3321,10 @@ void Self::connectXmppRoomSignals(QXmppMucRoom *room)
         // TODO: Maybe replace it with MUC/Sub Subscribers mechanism?
         m_impl->xmppRoomParticipantsManager->requestAll(room->jid());
 
+        m_impl->xmppMucSubManager->unsubscribe(room->jid());
         m_impl->xmppMucSubManager->subscribe(
                 {
                         XmppMucSubEvent::Messages,
-                        XmppMucSubEvent::Affiliations,
-                        XmppMucSubEvent::Subscribers,
-                        XmppMucSubEvent::Presence,
                 },
                 room->jid(), currentUser()->id());
 

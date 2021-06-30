@@ -32,32 +32,20 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_PLATFORM_PLATFORM_IOS
-#define VM_PLATFORM_PLATFORM_IOS
+#include "PlatformNotificationsDefault.h"
 
-#include "PlatformBase.h"
+using namespace vm;
+using namespace platform;
 
-namespace vm {
-namespace platform {
+using Self = PlatformNotificationsDefault;
 
-//
-//  iOS implementation of the Platform API.
-//
-class PlatformIos : public PlatformBase
+PlatformNotifications &PlatformNotifications::instance()
 {
-public:
-    //
-    //  Return writable location for the application.
-    //
-    QDir appDataLocation() const override;
+    static Self impl;
+    return impl;
+}
 
-    //
-    //  Defined it's own singleton access method to give access to specific methods.
-    //
-    static PlatformIos &instance();
-};
-
-} // namespace platform
-} // namespace vm
-
-#endif // VM_PLATFORM_PLATFORM_IOS
+bool Self::isPushSupported() const
+{
+    return false;
+}

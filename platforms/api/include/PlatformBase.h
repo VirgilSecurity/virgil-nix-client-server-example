@@ -65,16 +65,6 @@ public:
     //  Return nothing.
     //
     QString caBundlePath() const override;
-
-    //
-    //  Return false.
-    //
-    bool isPushAvailable() const override;
-
-    //
-    //  Return nothing.
-    //
-    QString pushToken() const override;
 };
 
 } // namespace platform

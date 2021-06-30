@@ -91,6 +91,29 @@ if (NOT TARGET platform-fs)
 endif()
 
 #
+#   Library: platform-notifications.
+#
+if (NOT TARGET platform-notifications)
+    add_library(platform-notifications STATIC)
+
+    target_sources(platform-notifications
+            PRIVATE
+            "${CMAKE_CURRENT_LIST_DIR}/include/PlatformNotificationsDefault.h"
+            "${CMAKE_CURRENT_LIST_DIR}/src/PlatformNotificationsDefault.cpp"
+            )
+
+    target_include_directories(platform-notifications
+            PRIVATE
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+            )
+
+    target_link_libraries(platform-notifications
+            PUBLIC
+            platform-notifications-api
+            )
+endif()
+
+#
 #   Library: platform-updates.
 #
 if (NOT TARGET platform-updates)

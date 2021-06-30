@@ -68,13 +68,3 @@ QString Self::caBundlePath() const
 {
     return {};
 }
-
-bool Self::isPushAvailable() const
-{
-    return false;
-}
-
-QString Self::pushToken() const
-{
-    return {};
-}

@@ -1,0 +1,4 @@
+<resources>
+    <string name="message_channel_name">Messages Channel</string>
+    <string name="message_channel_description">Channel for messages.</string>
+</resources>

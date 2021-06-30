@@ -56,11 +56,11 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
 - (void)didReceiveNotificationRequest:(UNNotificationRequest*)request
                    withContentHandler:(void (^)(UNNotificationContent* _Nonnull))contentHandler
 {
-    self.contentHandler = contentHandler;
-    self.bestAttemptContent = [request.content mutableCopy];
-
     Logging logging;
     Settings settings;
+
+    self.contentHandler = contentHandler;
+    self.bestAttemptContent = [request.content mutableCopy];
 
     //
     //  Extract encrypted message.
@@ -71,31 +71,33 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
     auto ciphertext = (NSString*)request.content.userInfo[@"ciphertext"];
 
     if (0 == senderJid.length) {
-        qCWarning(lcNotificationExtension) << "Required field 'from' is missing.";
+        qCWarning(lcNotificationExtension) << "Required field 'from' is missing. Show notification as is.";
+        self.contentHandler(self.bestAttemptContent);
         return;
     } else {
         qCDebug(lcNotificationExtension) << "Sender JID" << senderJid;
     }
 
-    auto senderId = CoreMessenger::userIdFromJid(QString::fromNSString(senderJid));
-    auto senderUsername = settings.usernameForId(senderId);
-    if (!senderUsername.isEmpty() && settings.usersList().contains(senderUsername)) {
+    const bool isGroupMessage = (0 == ciphertext.length);
+    if (isGroupMessage) {
         //
-        //  Ignore self push notifications that come from group chats.
+        //  Show group message as is.
         //
-        self.contentHandler = nil;
+        self.contentHandler(self.bestAttemptContent);
         return;
     }
 
     if (0 == recipientJid.length) {
-        qCWarning(lcNotificationExtension) << "Required field 'to' is missing.";
+        qCWarning(lcNotificationExtension) << "Required field 'to' is missing. Show notification as is.";
+        self.contentHandler(self.bestAttemptContent);
         return;
     } else {
         qCDebug(lcNotificationExtension) << "Recipient JID" << recipientJid;
     }
 
     if (0 == ciphertext.length) {
-        qCWarning(lcNotificationExtension) << "Required field 'ciphertext' is missing.";
+        qCWarning(lcNotificationExtension) << "Required field 'ciphertext' is missing. Show notification as is.";
+        self.contentHandler(self.bestAttemptContent);
         return;
     } else {
         qCDebug(lcNotificationExtension) << "Ciphertext" << ciphertext;
@@ -108,7 +110,8 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
         QString::fromNSString(senderJid), QString::fromNSString(ciphertext));
 
     if (auto result = std::get_if<CoreMessengerStatus>(&decryptResult)) {
-        qCWarning(lcNotificationExtension) << "Failed to decrypt message.";
+        qCWarning(lcNotificationExtension) << "Failed to decrypt message. Show notification as is.";
+        self.contentHandler(self.bestAttemptContent);
         return;
     }
 
@@ -130,6 +133,8 @@ Q_LOGGING_CATEGORY(lcNotificationExtension, "notification-extension");
     } else {
         qCWarning(lcNotificationExtension) << "Unexpected message content.";
     }
+
+    self.contentHandler(self.bestAttemptContent);
 }
 
 - (void)serviceExtensionTimeWillExpire

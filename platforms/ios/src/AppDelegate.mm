@@ -3,7 +3,7 @@
 #import <Intents/Intents.h>
 #import <UserNotifications/UserNotifications.h>
 
-#include "PlatformIos.h"
+#include "PlatformNotifications.h"
 
 #include <QDebug>
 
@@ -54,7 +54,6 @@ using namespace vm::platform;
 
     auto center = UNUserNotificationCenter.currentNotificationCenter;
 
-    //    center.delegate = self.pushNotificationsDelegate
     [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
         if (settings.authorizationStatus == UNAuthorizationStatusNotDetermined) {
             [center requestAuthorizationWithOptions:UNAuthorizationOptionAlert | UNAuthorizationOptionBadge
@@ -85,7 +84,7 @@ using namespace vm::platform;
 
     qDebug() << "Received device push token: " << tokenStr;
 
-    PlatformIos::instance().updatePushToken(tokenStr);
+    PlatformNotifications::instance().updatePushToken(tokenStr);
 }
 
 - (void)application:(UIApplication*)application
@@ -93,7 +92,7 @@ using namespace vm::platform;
 {
     qWarning() << "Failed to get device token";
 
-    PlatformIos::instance().updatePushToken({});
+    PlatformNotifications::instance().updatePushToken({});
 }
 
 @end

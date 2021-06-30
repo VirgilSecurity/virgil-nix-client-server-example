@@ -32,32 +32,62 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_PLATFORM_PLATFORM_IOS
-#define VM_PLATFORM_PLATFORM_IOS
+#ifndef VM_PLATFORM_PLATFORM_NOTIFICATONS
+#define VM_PLATFORM_PLATFORM_NOTIFICATONS
 
-#include "PlatformBase.h"
+#include <QObject>
 
 namespace vm {
 namespace platform {
 
 //
-//  iOS implementation of the Platform API.
+//  Provides API for application notifications.
 //
-class PlatformIos : public PlatformBase
+class PlatformNotifications : public QObject
 {
+    Q_OBJECT
+
+signals:
+    void pushTokenUpdated(const QString &pushToken);
+
 public:
     //
-    //  Return writable location for the application.
+    //  Perform platform dependent initialization.
     //
-    QDir appDataLocation() const override;
+    virtual void init();
 
     //
-    //  Defined it's own singleton access method to give access to specific methods.
+    //  Return true if Push Notifications are supported by a platform.
     //
-    static PlatformIos &instance();
+    virtual bool isPushSupported() const = 0;
+
+    //
+    //  Return true if Push Notifications are supported and push token is available.
+    //
+    bool isPushAvailable() const;
+
+    //
+    //  Return valid push token, or an empty string
+    //  if push notifications are not supported or token is not available yet.
+    //
+    QString pushToken() const;
+
+    //
+    //  Update push token.
+    //  Emit signal: 'pushTokenUpdated()'.
+    //
+    void updatePushToken(QString pushToken);
+
+    //
+    //  This method should be implemented within derived class.
+    //
+    static PlatformNotifications &instance();
+
+private:
+    QString m_pushToken;
 };
 
 } // namespace platform
 } // namespace vm
 
-#endif // VM_PLATFORM_PLATFORM_IOS
+#endif // VM_PLATFORM_PLATFORM_NOTIFICATONS

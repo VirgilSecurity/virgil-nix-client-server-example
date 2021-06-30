@@ -35,7 +35,6 @@
 #ifndef VM_PLATFORM_PLATFORM
 #define VM_PLATFORM_PLATFORM
 
-#include <QObject>
 #include <QString>
 #include <QDir>
 
@@ -45,13 +44,8 @@ namespace platform {
 //
 //  Provides General Platform Initialization.
 //
-class Platform : public QObject
+class Platform
 {
-    Q_OBJECT
-
-signals:
-    void pushTokenUpdated(const QString &pushToken);
-
 public:
     //
     //  Initialize system resources.
@@ -73,16 +67,6 @@ public:
     //  Return path to a file with custom CA certificates, or empty string.
     //
     virtual QString caBundlePath() const = 0;
-
-    //
-    //  Return true if Push Notifications are supported and push token is available.
-    //
-    virtual bool isPushAvailable() const = 0;
-
-    //
-    //  Return valid push token if Push Notifications are supported and it is available.
-    //
-    virtual QString pushToken() const = 0;
 
     virtual ~Platform() noexcept = default;
 

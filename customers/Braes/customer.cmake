@@ -31,7 +31,7 @@ set(SECURITY_APPLICATION_GROUP_IDENTIFIER "group.com.virgil.BraesMessenger")
 # ----------
 # ***********************************************************************************
 if(VS_PLATFORM STREQUAL "android")
-    # Firebase dir for gradle
+    # Android package name for gradle
     set(VS_ANDROID_PACKAGE_NAME "com.braes.braesmessenger")
 
 # ----------

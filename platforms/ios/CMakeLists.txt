@@ -123,6 +123,28 @@ target_link_libraries(platform-gui
         ${QUICK_LOOK_FRAMEWORK}
         Qt5::Gui
         )
+
+#
+#   Library: platform-notifications.
+#
+add_library(platform-notifications STATIC)
+
+target_sources(platform-notifications
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformNotificationsIos.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformNotificationsIos.cpp"
+        )
+
+target_include_directories(platform-notifications
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_link_libraries(platform-notifications
+        PUBLIC
+        platform-notifications-api
+        )
+
 # ---------------------------------------------------------------------------
 #   Common build settings.
 # ---------------------------------------------------------------------------

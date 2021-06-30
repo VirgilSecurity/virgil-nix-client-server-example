@@ -3,4 +3,3 @@ android.useAndroidX=true
 android.enableJetifier=true
 androidBuildToolsVersion=28.0.2
 androidCompileSdkVersion=28
-systemProp.firebase_cpp_sdk.dir=@VS_FIREBASE_DIR@

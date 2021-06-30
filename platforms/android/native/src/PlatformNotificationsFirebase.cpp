@@ -1,4 +1,4 @@
-//  Copyright (C) 2015-2020 Virgil Security, Inc.
+//  Copyright (C) 2015-2021 Virgil Security, Inc.
 //
 //  All rights reserved.
 //
@@ -32,43 +32,35 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
-#define VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+#include "PlatformNotificationsFirebase.h"
 
-#include <firebase/messaging.h>
-#include <firebase/app.h>
-#include <firebase/util.h>
+#include <QAndroidJniObject>
 
-#include <QtCore>
+#include <android/log.h>
 
-class QAndroidJniEnvironment;
+using namespace vm;
+using namespace platform;
 
-namespace vm {
-namespace notifications {
+using Self = PlatformNotificationsFirebase;
 
-class FirebaseListener : public firebase::messaging::Listener
+PlatformNotifications &PlatformNotifications::instance()
 {
-public:
-    static FirebaseListener &instance();
+    static Self impl;
+    return impl;
+}
 
-    void init();
+void Self::init()
+{
+    QAndroidJniObject::callStaticMethod<void>("org/virgil/notification/FirebaseMessageReceiver", "init", "()V");
+}
 
-    void OnTokenReceived(const char *token) override;
+bool Self::isPushSupported() const
+{
+    return true;
+}
 
-    void OnMessage(const firebase::messaging::Message &message) override;
-
-private:
-    FirebaseListener();
-
-    void showNotification(QString title, QString message);
-
-private:
-    QAndroidJniEnvironment *m_jniEnv;
-    firebase::App *m_app;
-    firebase::ModuleInitializer m_initializer;
-};
-
-} // namespace notifications
-} // namespace vm
-
-#endif // VIRGIL_MESSENGER_NOTIFICATIONS_ANDROID_FIREBASE_LISTENER_H_INCLUDED
+void Java_org_virgil_notification_FirebaseMessageReceiver_updatePushToken(JNIEnv *, jclass, jstring jPushToken)
+{
+    QAndroidJniObject pushToken(jPushToken);
+    PlatformNotifications::instance().updatePushToken(pushToken.toString());
+}

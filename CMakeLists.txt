@@ -372,6 +372,7 @@ target_sources(core-messenger
         #
         #   Includes
         #
+        "${CMAKE_CURRENT_LIST_DIR}/include/CloudFileMember.h"
         "${CMAKE_CURRENT_LIST_DIR}/include/messenger/AttachmentId.h"
         "${CMAKE_CURRENT_LIST_DIR}/include/messenger/Chat.h"
         "${CMAKE_CURRENT_LIST_DIR}/include/messenger/ChatId.h"
@@ -434,6 +435,7 @@ target_sources(core-messenger
         #
         #   Sources
         #
+        "${CMAKE_CURRENT_LIST_DIR}/src/CloudFileMember.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/src/messenger/AttachmentId.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/src/messenger/Chat.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/src/messenger/ChatId.cpp"
@@ -509,6 +511,8 @@ target_include_directories(core-messenger
 
 target_link_libraries(core-messenger
     PUBLIC
+        settings
+
         qxmpp
         comm-kit
         helpers
@@ -589,7 +593,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/include/ContactAvatarLoader.h
         ${CMAKE_CURRENT_LIST_DIR}/include/ConfirmationCodeType.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFile.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileMember.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileRequestId.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileSystem.h
         ${CMAKE_CURRENT_LIST_DIR}/include/CloudFileUpdateSource.h
@@ -722,7 +725,6 @@ target_sources(${VS_TARGET_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/src/ContactAvatarLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CustomerEnv.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFile.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileMember.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/CloudFileSystem.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/TimeProfiler.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/TimeProfilerSection.cpp
@@ -848,6 +850,7 @@ target_link_libraries(${VS_TARGET_NAME}
         platform
         platform-definitions
         platform-fs
+        platform-notifications
         platform-updates
         platform-gui
         settings

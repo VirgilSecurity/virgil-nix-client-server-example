@@ -35,6 +35,12 @@
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 # ---------------------------------------------------------------------------
+#   Android Build options.
+# ---------------------------------------------------------------------------
+set(USE_FIREBASE_NOTIFICATION_SERVICE ON CACHE BOOL "Use Firebase notification service.")
+set(USE_PUSHY_ME_NOTIFICATION_SERVICE OFF CACHE BOOL "Use pushy.me notification service.")
+
+# ---------------------------------------------------------------------------
 #   System introspection
 # ---------------------------------------------------------------------------
 include("${ANDROID_SDK}/android_openssl/CMakeLists.txt")
@@ -58,8 +64,6 @@ endif()
 
 message(STATUS "Android OpenSSL library path: [${VS_ANDROID_SSL_DIR}]")
 
-get_firebase("${PROJECT_SOURCE_DIR}/ext")
-
 find_package(Qt5 COMPONENTS AndroidExtras REQUIRED)
 
 # ---------------------------------------------------------------------------
@@ -79,14 +83,8 @@ target_link_libraries(platform-deps
         crypto_1_1
         )
 
-target_include_directories(platform-deps
-        SYSTEM INTERFACE
-        "$<BUILD_INTERFACE:${PREBUILT_DIR}/firebase_cpp_sdk/include>"
-        )
-
 target_link_directories(platform-deps
         INTERFACE
-        "$<BUILD_INTERFACE:${PREBUILT_DIR}/firebase_cpp_sdk/libs/android/${ANDROID_ABI}/c++>"
         "$<BUILD_INTERFACE:${VS_ANDROID_SSL_DIR}>"
         )
 
@@ -98,10 +96,7 @@ add_library(platform STATIC)
 target_sources(platform
         PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformAndroid.h"
-        "${CMAKE_CURRENT_LIST_DIR}/native/include/FirebaseListener.h"
-
         "${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformAndroid.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/native/src/FirebaseListener.cpp"
         )
 
 target_include_directories(platform
@@ -114,11 +109,32 @@ target_link_libraries(platform
         platform-deps
         platform-base
         customer
-
-        firebase_messaging
-        firebase_app
-        firebase_auth
         )
+
+#
+#   Library: platform-notifications.
+#
+if (USE_FIREBASE_NOTIFICATION_SERVICE OR USE_PUSHY_ME_NOTIFICATION_SERVICE)
+        add_library(platform-notifications STATIC)
+
+        target_sources(platform-notifications
+                PRIVATE
+                "$<$<BOOL:USE_FIREBASE_NOTIFICATION_SERVICE>:${CMAKE_CURRENT_LIST_DIR}/native/include/PlatformNotificationsFirebase.h>"
+                "$<$<BOOL:USE_FIREBASE_NOTIFICATION_SERVICE>:${CMAKE_CURRENT_LIST_DIR}/native/src/PlatformNotificationsFirebase.cpp>"
+                )
+
+        target_include_directories(platform-notifications
+                PRIVATE
+                "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
+                )
+
+        target_link_libraries(platform-notifications
+                PUBLIC
+                Qt5::AndroidExtras
+                platform-notifications-api
+                core-messenger
+                )
+endif()
 
 #
 #   Library: platform-fs.
@@ -192,7 +208,6 @@ file(COPY "${VS_CUSTOMER_DIR}/platforms/android/" DESTINATION "${GRADLE_BUILD_DI
 #  Copy Gradle support files.
 #
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradle" DESTINATION "${GRADLE_BUILD_DIR}")
-file(COPY "${CMAKE_CURRENT_LIST_DIR}/build.gradle" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradlew" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/gradlew.bat" DESTINATION "${GRADLE_BUILD_DIR}")
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/project.properties" DESTINATION "${GRADLE_BUILD_DIR}")
@@ -218,12 +233,22 @@ configure_file(
         @ONLY
         )
 
-set(VS_FIREBASE_DIR "${PREBUILT_DIR}/firebase_cpp_sdk")
 configure_file(
         "${CMAKE_CURRENT_LIST_DIR}/gradle.properties.in"
         "${GRADLE_BUILD_DIR}/gradle.properties"
         @ONLY
         )
+
+file(READ "${CMAKE_CURRENT_LIST_DIR}/build.gradle" BUILD_GRADLE_CONTENTS)
+
+if(USE_FIREBASE_NOTIFICATION_SERVICE)
+    file(READ "${CMAKE_CURRENT_LIST_DIR}/firebase.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
+
+elseif(USE_PUSHY_ME_NOTIFICATION_SERVICE)
+    file(READ "${CMAKE_CURRENT_LIST_DIR}/pushyme.gradle" NOTIFICATIONS_GRADLE_CONTENTS)
+endif()
+
+file(WRITE "${GRADLE_BUILD_DIR}/build.gradle" "${BUILD_GRADLE_CONTENTS}" "${NOTIFICATIONS_GRADLE_CONTENTS}")
 
 # ---------------------------------------------------------------------------
 #   Main target.
@@ -234,6 +259,36 @@ add_custom_command(TARGET ${VS_TARGET_NAME} POST_BUILD
       COMMAND touch "${CMAKE_BINARY_DIR}/CMakeCache.txt"
       COMMENT "Touch CMakeCache.txt"
 )
+
+# ---------------------------------------------------------------------------
+#   Separate library that decrypts push notifications.
+# ---------------------------------------------------------------------------
+add_library(push-handler SHARED)
+
+target_sources(push-handler
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/native/include/PushHandlerService.h"
+        "${CMAKE_CURRENT_LIST_DIR}/native/src/PushHandlerService.cpp"
+        )
+
+target_include_directories(push-handler
+        PRIVATE
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/native/include>"
+        )
+
+target_link_libraries(push-handler
+        PRIVATE
+        core-messenger
+        platform-notifications
+
+        Qt5::Core
+        Qt5::AndroidExtras
+        log
+        )
+
+if(COMMAND add_clangformat AND ENABLE_CLANGFORMAT)
+    add_clangformat(push-handler)
+endif()
 
 # ---------------------------------------------------------------------------
 #   Deploy

@@ -34,7 +34,7 @@ set(VS_BUNDLE_PREFIX "com.virgil")
 # ----------
 # ***********************************************************************************
 if(VS_PLATFORM STREQUAL "android")
-    # Firebase dir for gradle
+    # Android package name for gradle
     set(VS_ANDROID_PACKAGE_NAME "com.virgilsecurity.android.virgil")
 
 # ----------

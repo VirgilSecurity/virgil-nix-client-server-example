@@ -34,9 +34,9 @@
 
 #include "PlatformAndroid.h"
 
-#include "FirebaseListener.h"
-
 #include <QtAndroid>
+
+#include "PlatformNotifications.h"
 
 #include <android/log.h>
 #include <pthread.h>
@@ -44,8 +44,7 @@
 #include <cstdio>
 
 using namespace vm;
-using namespace vm::platform;
-using namespace vm::notifications;
+using namespace platform;
 
 using Self = PlatformAndroid;
 
@@ -149,7 +148,7 @@ bool Self::uiInit() const
         return false;
     }
 
-    FirebaseListener::instance().init();
+    PlatformNotifications::instance().init();
 
     return true;
 }
@@ -157,20 +156,4 @@ bool Self::uiInit() const
 QString Self::caBundlePath() const
 {
     return appDataLocation().filePath("cert.pem");
-}
-
-bool Self::isPushAvailable() const
-{
-    return !m_pushToken.isEmpty();
-}
-
-void Self::updatePushToken(QString pushToken)
-{
-    m_pushToken = std::move(pushToken);
-    emit pushTokenUpdated(m_pushToken);
-}
-
-QString Self::pushToken() const
-{
-    return m_pushToken;
 }

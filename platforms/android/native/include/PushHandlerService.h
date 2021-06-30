@@ -32,32 +32,14 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_PLATFORM_PLATFORM_IOS
-#define VM_PLATFORM_PLATFORM_IOS
+#ifndef VM_PLATFORM_ANDROID_PUSH_HANDLER_SERVICE
+#define VM_PLATFORM_ANDROID_PUSH_HANDLER_SERVICE
 
-#include "PlatformBase.h"
+#include <jni.h>
 
-namespace vm {
-namespace platform {
+extern "C" {
+JNIEXPORT jobject JNICALL Java_org_virgil_notification_PushHandlerService_decryptNotification(JNIEnv *, jclass, jstring,
+                                                                                              jstring, jstring);
+}
 
-//
-//  iOS implementation of the Platform API.
-//
-class PlatformIos : public PlatformBase
-{
-public:
-    //
-    //  Return writable location for the application.
-    //
-    QDir appDataLocation() const override;
-
-    //
-    //  Defined it's own singleton access method to give access to specific methods.
-    //
-    static PlatformIos &instance();
-};
-
-} // namespace platform
-} // namespace vm
-
-#endif // VM_PLATFORM_PLATFORM_IOS
+#endif // VM_PLATFORM_ANDROID_PUSH_HANDLER_SERVICE

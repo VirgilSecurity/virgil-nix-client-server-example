@@ -35,7 +35,7 @@
 #include "XmppPushNotifications.h"
 
 #include "VSQCustomer.h"
-#include "Platform.h"
+#include "PlatformNotifications.h"
 
 #include <qxmpp/QXmppMessage.h>
 #include <qxmpp/QXmppPushEnableIq.h>
@@ -100,7 +100,7 @@ QXmppPushEnableIq Self::buildEnableIq() const
     { // Subscribe device
         QXmppDataForm::Field field;
         field.setKey(kPushNotificationsDeviceID);
-        field.setValue(Platform::instance().pushToken());
+        field.setValue(PlatformNotifications::instance().pushToken());
         fields << field;
     }
 #if VS_IOS

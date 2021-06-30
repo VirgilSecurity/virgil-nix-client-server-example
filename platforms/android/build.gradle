@@ -17,28 +17,8 @@ repositories {
 
 apply plugin: 'com.android.application'
 
-//
-//  Add Firebase
-//
-project.ext {
-  // Configure the Firebase C++ SDK location.
-  firebase_cpp_sdk_dir = System.getProperty('firebase_cpp_sdk.dir')
-  printf('Firebase C++ SDK directory %s', firebase_cpp_sdk_dir)
-}
-
-
-repositories {
-    flatDir {
-        dirs project.ext.firebase_cpp_sdk_dir + "/libs/android"
-    }
-}
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    compile 'com.google.firebase:firebase-core:15.0.2'
-    compile 'com.google.firebase:firebase-auth:19.3.1'
-    compile 'com.google.firebase:firebase-messaging:20.1.7'
-    compile 'com.google.firebase.messaging.cpp:firebase_messaging_cpp@aar'
     compile 'com.google.android.gms:play-services-base:17.2.1'
 }
 
@@ -73,6 +53,11 @@ android {
        }
     }
 
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
     lintOptions {
         abortOnError false
     }
@@ -90,3 +75,7 @@ android {
 }
 
 apply plugin: 'com.google.gms.google-services'
+
+task showMeCache doLast() {
+    configurations.compileClasspath.each { println it }
+}

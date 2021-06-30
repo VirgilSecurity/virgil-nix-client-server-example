@@ -1,0 +1,12 @@
+
+//
+//  Add PushyMe
+//
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'me.pushy:sdk:1.0.70'
+}

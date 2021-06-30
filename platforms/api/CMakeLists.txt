@@ -119,6 +119,28 @@ target_link_libraries(platform-fs-base
         )
 
 #
+#   Library: platform-notifications-api
+#
+add_library(platform-notifications-api STATIC)
+
+target_sources(platform-notifications-api
+        PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/PlatformNotifications.h"
+        "${CMAKE_CURRENT_LIST_DIR}/src/PlatformNotifications.cpp"
+        )
+
+
+target_include_directories(platform-notifications-api
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+        )
+
+target_link_libraries(platform-notifications-api
+        PUBLIC
+        Qt5::Core
+        )
+
+#
 #   Library: platform-updates-api
 #
 add_library(platform-updates-api STATIC)

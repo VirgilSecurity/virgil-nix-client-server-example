@@ -32,32 +32,30 @@
 //
 //  Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
 
-#ifndef VM_PLATFORM_PLATFORM_IOS
-#define VM_PLATFORM_PLATFORM_IOS
+#include "PlatformNotifications.h"
 
-#include "PlatformBase.h"
+#include <QLoggingCategory>
 
-namespace vm {
-namespace platform {
+using namespace vm;
+using namespace platform;
 
-//
-//  iOS implementation of the Platform API.
-//
-class PlatformIos : public PlatformBase
+using Self = PlatformNotifications;
+
+Q_LOGGING_CATEGORY(lcPlatformNotifications, "platform-notifications");
+
+void Self::init() {}
+
+bool Self::isPushAvailable() const
 {
-public:
-    //
-    //  Return writable location for the application.
-    //
-    QDir appDataLocation() const override;
+    return isPushSupported() && !m_pushToken.isEmpty();
+}
 
-    //
-    //  Defined it's own singleton access method to give access to specific methods.
-    //
-    static PlatformIos &instance();
-};
+void Self::updatePushToken(QString pushToken)
+{
+    qCDebug(lcPlatformNotifications) << "Got updated push token:" << pushToken;
 
-} // namespace platform
-} // namespace vm
+    m_pushToken = std::move(pushToken);
+    emit pushTokenUpdated(m_pushToken);
+}
 
-#endif // VM_PLATFORM_PLATFORM_IOS
+QString Self::pushToken() const { return m_pushToken; }
